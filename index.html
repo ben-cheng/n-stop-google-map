@@ -1,56 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N-stop Google Map</title>
-    <script>
-        function handleInputChange(event) {
-            const input = event.target.value;
-            const baseUrl = "https://google.com/maps/dir/";
-
-            const directions = input.split('\n')
-                .map(stop => stop.trim())
-                .map(stop => encodeURIComponent(stop).replace(/%20/g, '+'))
-                .filter(stop => stop.length > 0)
-                .join('/');
-
-            let fullUrl = baseUrl;
-            if (directions.length > 0) {
-                fullUrl += directions;
-            }
-            document.getElementById('link').href = fullUrl;
-            document.getElementById('link').text = fullUrl;
-        }
-    </script>
-</head>
-<body>
-    <h1>N-stop Google Map</h1>
-    <p><label for="textInput">Enter stops:</label></p>
-
-    <textarea id="textInput" style="width:80%; height: 20rem;" oninput="handleInputChange(event)"></textarea>
-
-    <div style="width: 80rem; max-width: 80%;">
-        <a id="link" href="#" style="word-break: break-all;" target="_blank"> </a>
-    </div>
-
-    <div>
-        <h2>About N-stop Google Map</h2>
-        <p>N-stop Google Map is a web application that allows users to create and visualize routes with multiple stops using Google Maps API. It is designed to help users plan trips with several destinations efficiently.</p>
-        <h3>Features:</h3>
-        <ul>
-            <li>Add multiple stops to your route</li>
-            <li>View the entire route on Google Maps</li>
-            <li>Get directions and estimated travel times</li>
-            <li>Save and share your routes</li>
-        </ul>
-        <h3>How to Use:</h3>
-        <ol>
-            <li>Enter your starting point and destination.</li>
-            <li>Add any additional stops you want to include in your route.</li>
-            <li>Click on "Generate Route" to see the map with all stops plotted.</li>
-            <li>Use the provided directions to navigate your trip.</li>
-        </ol>
-    </div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>n-stop-google-map</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
