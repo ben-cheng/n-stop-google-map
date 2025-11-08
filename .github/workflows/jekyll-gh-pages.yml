@@ -62,6 +62,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
+          name: my-artifact-${{ github.job }} 
           # Upload dist folder
           path: './dist'
       - name: Deploy to GitHub Pages
