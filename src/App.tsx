@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 const App: React.FC = () => {
   const [input, setInput] = useState<string>("");
   const [mapUrl, setMapUrl] = useState<string>("https://google.com/maps/dir/");
 
-  const handleInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setInput(value);
 
@@ -15,9 +13,9 @@ const App: React.FC = () => {
 
     const directions = value
       .split("\n")
-      .map((stop) => stop.trim())
-      .map((stop) => encodeURIComponent(stop).replace(/%20/g, "+"))
-      .filter((stop) => stop.length > 0)
+      .map((stop: string) => stop.trim())
+      .map((stop: string) => encodeURIComponent(stop).replace(/%20/g, "+"))
+      .filter((stop:string) => stop.length > 0)
       .join("/");
 
     const fullUrl = directions.length > 0 ? baseUrl + directions : baseUrl;
