@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/<REPO>/',
+  base: '/n-stop-google-map/',
   plugins: [
     react(),
     tailwindcss(),
