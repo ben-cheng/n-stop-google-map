@@ -1,26 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import GoogleMapUrlGenerator from './utils/GoogleMapUrlGenerator'
 import './App.css'
+import { useLocalStorage } from 'usehooks-ts';
+
+const localStorageKey = "n-stop-google-map-input";
 
 const App: React.FC = () => {
-  const [input, setInput] = useState<string>("");
-  const [mapUrl, setMapUrl] = useState<string>("https://google.com/maps/dir/");
+  const [input, setInput] = useLocalStorage<string>(localStorageKey, '');
+  const [mapUrl, setMapUrl] = useState<string>("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setInput(value);
-
-    const baseUrl = "https://google.com/maps/dir/";
-
-    const directions = value
-      .split("\n")
-      .map((stop: string) => stop.trim())
-      .map((stop: string) => encodeURIComponent(stop).replace(/%20/g, "+"))
-      .filter((stop:string) => stop.length > 0)
-      .join("/");
-
-    const fullUrl = directions.length > 0 ? baseUrl + directions : baseUrl;
-    setMapUrl(fullUrl);
   };
+
+  useEffect(() => {
+    const fullUrl = GoogleMapUrlGenerator(input);
+    setMapUrl(fullUrl);
+  }, [input]);
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -38,16 +35,21 @@ const App: React.FC = () => {
         placeholder="Enter each stop on a new line..."
       />
 
-      <div className="break-words mb-6">
-        <a
-          id="link"
-          href={mapUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline"
-        >
-          {mapUrl}
-        </a>
+      <div className="wrap-break-word mb-6 min-h-24">
+        {!!mapUrl.length && (
+          <>
+            <h2 className="text-xl font-semibold mb-2">Generated Google Maps Link:</h2>
+            <a
+              id="link"
+              href={mapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              {mapUrl}
+            </a>
+          </>
+        )}
       </div>
 
       <div>
