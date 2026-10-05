@@ -68,6 +68,8 @@ const App: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">N-stop Google Map</h1>
 
+      <p><input type="button" value="Clear" onClick={() => setInput('')} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mb-4" /></p>
+
       <label htmlFor="textInput" className="block mb-2 font-medium">
         Enter stops (one per line):
       </label>
