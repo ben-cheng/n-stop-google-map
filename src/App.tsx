@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import GoogleMapUrlGenerator from './utils/GoogleMapUrlGenerator'
 import './App.css'
 import { useLocalStorage } from 'usehooks-ts';
+import { createWorker } from 'tesseract.js';
 
 const localStorageKey = "n-stop-google-map-input";
 
@@ -12,6 +13,49 @@ const App: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setInput(value);
+  };
+
+  const HandlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+
+    const textarea = e.currentTarget;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    let insertedText = '';
+
+    // Handle file paste
+    if (e.clipboardData.files.length > 0) {
+      const file = e.clipboardData.files[0];
+
+      if (!file) {
+        insertedText = 'Not a file';
+      } else {
+        const worker = await createWorker('eng');
+        const ret = await worker.recognize(file);
+
+        insertedText = ret.data.text || 'No text recognized';
+      }
+    } else {
+      // Handle normal text paste
+      insertedText = e.clipboardData.getData('text');
+    }
+
+    // Normalize line endings
+    insertedText = insertedText.replace(/\r\n|\r|\n/g, '\n');
+
+    // Insert text at cursor/selection
+    setInput((current) => {
+      return current.slice(0, start) + insertedText + current.slice(end);
+    });
+
+    // Restore cursor position after inserted text
+    requestAnimationFrame(() => {
+      const newPosition = start + insertedText.length;
+
+      textarea.focus();
+      textarea.setSelectionRange(newPosition, newPosition);
+    });
   };
 
   useEffect(() => {
@@ -33,6 +77,7 @@ const App: React.FC = () => {
         onChange={handleInputChange}
         className="w-full h-80 p-3 border rounded-lg mb-4"
         placeholder="Enter each stop on a new line..."
+        onPaste={HandlePaste}
       />
 
       <div className="wrap-break-word mb-6 min-h-24">
