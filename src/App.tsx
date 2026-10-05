@@ -3,6 +3,7 @@ import GoogleMapUrlGenerator from './utils/GoogleMapUrlGenerator'
 import './App.css'
 import { useLocalStorage } from 'usehooks-ts';
 import { createWorker } from 'tesseract.js';
+import pkg from '../package.json' with { type: 'json' };
 
 const localStorageKey = "n-stop-google-map-input";
 
@@ -119,6 +120,10 @@ const App: React.FC = () => {
           <li>Copy or click the generated Google Maps link.</li>
           <li>Use the provided directions to navigate your trip.</li>
         </ol>
+
+        <p className="text-sm text-gray-500">
+          version: {pkg.version}
+        </p>
       </div>
     </div>
   )
