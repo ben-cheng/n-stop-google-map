@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import GoogleMapUrlGenerator from './utils/GoogleMapUrlGenerator'
+import ExtractLocations from './utils/ExtractLocations'
 import './App.css'
 import { useLocalStorage } from 'usehooks-ts';
 import { createWorker } from 'tesseract.js';
@@ -44,6 +45,7 @@ const App: React.FC = () => {
 
     // Normalize line endings
     insertedText = insertedText.replace(/\r\n|\r|\n/g, '\n');
+    insertedText = ExtractLocations(insertedText);
 
     // Insert text at cursor/selection
     setInput((current) => {
