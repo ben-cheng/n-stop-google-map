@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import GoogleMapUrlGenerator from './utils/GoogleMapUrlGenerator'
 import ExtractLocations from './utils/ExtractLocations'
+import { getSavedStops, saveStops, type SavedStops } from './utils/SavedStopsStore'
 import './App.css'
 import { useLocalStorage } from 'usehooks-ts';
 import { createWorker } from 'tesseract.js';
@@ -11,6 +12,9 @@ const localStorageKey = "n-stop-google-map-input";
 const App: React.FC = () => {
   const [input, setInput] = useLocalStorage<string>(localStorageKey, '');
   const [mapUrl, setMapUrl] = useState<string>("");
+  const [saveTitle, setSaveTitle] = useState('');
+  const [savedStops, setSavedStops] = useState<SavedStops[]>([]);
+  const [storageMessage, setStorageMessage] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -66,6 +70,43 @@ const App: React.FC = () => {
     setMapUrl(fullUrl);
   }, [input]);
 
+  useEffect(() => {
+    let isCurrent = true;
+
+    getSavedStops()
+      .then((saved) => {
+        if (isCurrent) {
+          setSavedStops(saved);
+        }
+      })
+      .catch((error: unknown) => {
+        if (isCurrent) {
+          setStorageMessage(error instanceof Error ? error.message : 'Could not load saved stops.');
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
+
+  const handleSaveStops = async () => {
+    const title = saveTitle.trim();
+    if (!title || !input.trim()) {
+      setStorageMessage('Enter a title and at least one stop before saving.');
+      return;
+    }
+
+    try {
+      await saveStops(title, input);
+      setSavedStops(await getSavedStops());
+      setSaveTitle('');
+      setStorageMessage(`Saved "${title}".`);
+    } catch (error) {
+      setStorageMessage(error instanceof Error ? error.message : 'Could not save these stops.');
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">N-stop Google Map</h1>
@@ -84,6 +125,59 @@ const App: React.FC = () => {
         placeholder="Enter each stop on a new line..."
         onPaste={HandlePaste}
       />
+
+      <section className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">Save this route</h2>
+        <div className="flex flex-wrap gap-2">
+          <label htmlFor="saveTitle" className="sr-only">Route title</label>
+          <input
+            id="saveTitle"
+            type="text"
+            value={saveTitle}
+            onChange={(e) => setSaveTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                void handleSaveStops();
+              }
+            }}
+            placeholder="Name this route"
+            className="min-w-0 flex-1 p-2 border rounded"
+          />
+          <button
+            type="button"
+            onClick={() => void handleSaveStops()}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Save
+          </button>
+        </div>
+        {storageMessage && <p role="status" className="mt-2 text-sm">{storageMessage}</p>}
+      </section>
+
+      <section className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">Saved routes</h2>
+        {savedStops.length > 0 ? (
+          <ul className="space-y-2">
+            {savedStops.map((saved) => (
+              <li key={saved.id} className="flex flex-wrap items-center justify-between gap-2 border rounded p-3">
+                <span>{saved.title}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInput(saved.content);
+                    setStorageMessage(`Loaded "${saved.title}".`);
+                  }}
+                  className="text-blue-600 underline"
+                >
+                  Load
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-gray-600">No routes saved yet.</p>
+        )}
+      </section>
 
       <div className="wrap-break-word mb-6 min-h-24">
         {!!mapUrl.length && (
