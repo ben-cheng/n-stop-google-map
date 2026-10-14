@@ -14,6 +14,7 @@ const App: React.FC = () => {
   const [mapUrl, setMapUrl] = useState<string>("");
   const [saveTitle, setSaveTitle] = useState('');
   const [savedStops, setSavedStops] = useState<SavedStops[]>([]);
+  const [savedRoutesSearch, setSavedRoutesSearch] = useState('');
   const [storageMessage, setStorageMessage] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -107,6 +108,11 @@ const App: React.FC = () => {
     }
   };
 
+  const searchTerm = savedRoutesSearch.trim().toLocaleLowerCase();
+  const filteredSavedStops = savedStops.filter((saved) =>
+    `${saved.title}\n${saved.content}`.toLocaleLowerCase().includes(searchTerm),
+  );
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">N-stop Google Map</h1>
@@ -156,9 +162,18 @@ const App: React.FC = () => {
 
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Saved routes</h2>
-        {savedStops.length > 0 ? (
+        <label htmlFor="savedRoutesSearch" className="sr-only">Search saved routes</label>
+        <input
+          id="savedRoutesSearch"
+          type="search"
+          value={savedRoutesSearch}
+          onChange={(e) => setSavedRoutesSearch(e.target.value)}
+          placeholder="Search by title or stop"
+          className="w-full p-2 border rounded mb-3"
+        />
+        {filteredSavedStops.length > 0 ? (
           <ul className="space-y-2">
-            {savedStops.map((saved) => (
+            {filteredSavedStops.map((saved) => (
               <li key={saved.id} className="flex flex-wrap items-center justify-between gap-2 border rounded p-3">
                 <span>{saved.title}</span>
                 <button
@@ -174,6 +189,8 @@ const App: React.FC = () => {
               </li>
             ))}
           </ul>
+        ) : savedStops.length > 0 ? (
+          <p className="text-sm text-gray-600">No saved routes match your search.</p>
         ) : (
           <p className="text-sm text-gray-600">No routes saved yet.</p>
         )}
