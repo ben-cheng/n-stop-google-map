@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import GoogleMapUrlGenerator from './utils/GoogleMapUrlGenerator'
 import ExtractLocations from './utils/ExtractLocations'
-import { getSavedStops, saveStops, type SavedStops } from './utils/SavedStopsStore'
+import { deleteSavedStops, getSavedStops, saveStops, type SavedStops } from './utils/SavedStopsStore'
 import { useLocalStorage } from 'usehooks-ts';
 import { createWorker } from 'tesseract.js';
 import pkg from '../package.json' with { type: 'json' };
@@ -105,6 +105,20 @@ const App: React.FC = () => {
       setStorageMessage(`${updated ? 'Updated' : 'Saved'} "${title}".`);
     } catch (error) {
       setStorageMessage(error instanceof Error ? error.message : 'Could not save these stops.');
+    }
+  };
+
+  const handleDeleteSavedStops = async (saved: SavedStops) => {
+    if (!window.confirm(`Delete the saved route "${saved.title}"?`)) {
+      return;
+    }
+
+    try {
+      await deleteSavedStops(saved.id);
+      setSavedStops(await getSavedStops());
+      setStorageMessage(`Deleted "${saved.title}".`);
+    } catch (error) {
+      setStorageMessage(error instanceof Error ? error.message : 'Could not delete this saved route.');
     }
   };
 
@@ -253,20 +267,30 @@ const App: React.FC = () => {
                 {filteredSavedStops.map((saved) => (
                   <li
                     key={saved.id}
-                    className="flex min-w-0 items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
+                    className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
                   >
-                    <span className="min-w-0 wrap-break-word font-semibold text-slate-800">{saved.title}</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setInput(saved.content);
-                        setStorageMessage(`Loaded "${saved.title}".`);
-                      }}
-                      className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-slate-400 bg-white px-3 py-2 font-semibold text-blue-950 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
-                      aria-label={`Load ${saved.title}`}
-                    >
-                      Load
-                    </button>
+                    <span className="min-w-0 flex-1 wrap-break-word font-semibold text-slate-800">{saved.title}</span>
+                    <div className="flex shrink-0 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInput(saved.content);
+                          setStorageMessage(`Loaded "${saved.title}".`);
+                        }}
+                        className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-400 bg-white px-3 py-2 font-semibold text-blue-950 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
+                        aria-label={`Load ${saved.title}`}
+                      >
+                        Load
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteSavedStops(saved)}
+                        className="inline-flex min-h-11 items-center justify-center rounded-lg border border-red-800 bg-white px-3 py-2 font-semibold text-red-900 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-800 focus-visible:ring-offset-2"
+                        aria-label={`Delete ${saved.title}`}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>

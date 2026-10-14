@@ -104,3 +104,20 @@ export const saveStops = async (title: string, content: string): Promise<boolean
     };
   });
 };
+
+export const deleteSavedStops = async (id: number): Promise<void> => {
+  const database = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(storeName, 'readwrite');
+    transaction.objectStore(storeName).delete(id);
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => {
+      reject(transaction.error ?? new Error('Could not delete this saved route.'));
+    };
+    transaction.onabort = () => {
+      reject(transaction.error ?? new Error('Deleting this saved route was cancelled.'));
+    };
+  });
+};
