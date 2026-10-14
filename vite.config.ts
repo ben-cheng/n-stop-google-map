@@ -15,7 +15,7 @@ export default defineConfig({
         name: 'N-Stop Google Map',
         short_name: 'N-Stop G-Map',
         description: 'A simple application to mark more ten stops to Google Map.',
-        theme_color: '#ffffff',
+        theme_color: '#0B2344',
         icons: [
           {
             "src": "pwa-64x64.png",
