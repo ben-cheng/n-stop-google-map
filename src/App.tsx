@@ -98,10 +98,10 @@ const App: React.FC = () => {
     }
 
     try {
-      await saveStops(title, input);
+      const updated = await saveStops(title, input);
       setSavedStops(await getSavedStops());
       setSaveTitle('');
-      setStorageMessage(`Saved "${title}".`);
+      setStorageMessage(`${updated ? 'Updated' : 'Saved'} "${title}".`);
     } catch (error) {
       setStorageMessage(error instanceof Error ? error.message : 'Could not save these stops.');
     }

@@ -70,18 +70,32 @@ export const getSavedStops = async (): Promise<SavedStops[]> => {
   });
 };
 
-export const saveStops = async (title: string, content: string): Promise<void> => {
+export const saveStops = async (title: string, content: string): Promise<boolean> => {
   const database = await openDatabase();
 
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(storeName, 'readwrite');
-    transaction.objectStore(storeName).add({
-      title,
-      content,
-      updatedAt: Date.now(),
-    });
+    const store = transaction.objectStore(storeName);
+    const request = store.getAll() as IDBRequest<SavedStops[]>;
+    let updatedExisting = false;
 
-    transaction.oncomplete = () => resolve();
+    request.onsuccess = () => {
+      const existing = request.result.find((saved) => saved.title === title);
+      const route: Omit<SavedStops, 'id'> = {
+        title,
+        content,
+        updatedAt: Date.now(),
+      };
+
+      if (existing) {
+        store.put({ ...route, id: existing.id });
+        updatedExisting = true;
+      } else {
+        store.add(route);
+      }
+    };
+
+    transaction.oncomplete = () => resolve(updatedExisting);
     transaction.onerror = () => {
       reject(transaction.error ?? new Error('Could not save these stops.'));
     };
